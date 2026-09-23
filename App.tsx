@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { BlurView } from "expo-blur";
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -101,21 +102,25 @@ export default function App() {
 
       <Animated.View pointerEvents="none" style={[styles.scrim, scrimStyle]} />
 
-      <ScrollView
+      {/* Bisect: the reported screen's scroll container is turned into a Reanimated component by
+          heroui-native's ScrollShadow, and it carries a RefreshControl. */}
+      <Animated.ScrollView
         contentContainerStyle={styles.content}
         onScroll={onScroll}
+        refreshControl={<RefreshControl onRefresh={() => undefined} refreshing={false} tintColor="#8A8A90" />}
         scrollEventThrottle={16}
       >
         <Text style={styles.batch}>种子批次 · {rows} 项待处理</Text>
-        <View style={styles.card}>
+        {/* Bisect: the reported app's group container carries the single real blur (Glass) layer on iOS. */}
+        <BlurView intensity={40} style={styles.card} tint="light">
           <Text style={styles.cardTitle}>二层 · 防火门 {rows === 0 ? "0/0" : `0/${rows}`}</Text>
           {rows > 0 ? (
             Array.from({ length: rows }, (_, index) => <Row key={index} index={index} />)
           ) : (
             <Text style={styles.empty}>当前条件下没有匹配的事项</Text>
           )}
-        </View>
-      </ScrollView>
+        </BlurView>
+      </Animated.ScrollView>
 
       <View style={styles.tabBar}>
         {["待办", "上报", "应用", "我的"].map((label, index) => (
@@ -140,7 +145,7 @@ const styles = StyleSheet.create({
   tileLabel: { fontSize: 12, color: "#6B6B70", textAlign: "center" },
   content: { paddingHorizontal: 20, paddingBottom: 40 },
   batch: { fontSize: 15, color: "#6B6B70", marginBottom: 8 },
-  card: { backgroundColor: "#FFFFFF", borderRadius: 16, padding: 8 },
+  card: { borderRadius: 16, padding: 8, overflow: "hidden" },
   cardTitle: { fontSize: 14, color: "#3F6FD8", marginBottom: 6 },
   empty: { paddingVertical: 24, textAlign: "center", color: "#6B6B70" },
   row: {

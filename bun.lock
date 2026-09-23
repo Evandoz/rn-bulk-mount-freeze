@@ -6,6 +6,7 @@
       "name": "rn-bulk-mount-freeze-repro",
       "dependencies": {
         "expo": "55.0.28",
+        "expo-blur": "~55.0.18",
         "expo-dev-client": "~55.0.40",
         "expo-status-bar": "55.0.6",
         "react": "19.2.0",
@@ -517,6 +518,8 @@
     "expo": ["expo@55.0.28", "https://registry.npmmirror.com/expo/-/expo-55.0.28.tgz", { "dependencies": { "@babel/runtime": "^7.20.0", "@expo/cli": "55.0.34", "@expo/config": "~55.0.19", "@expo/config-plugins": "~55.0.11", "@expo/devtools": "55.0.3", "@expo/fingerprint": "0.16.8", "@expo/local-build-cache-provider": "55.0.15", "@expo/log-box": "55.0.13", "@expo/metro": "~55.1.1", "@expo/metro-config": "55.0.25", "@expo/vector-icons": "^15.0.2", "@ungap/structured-clone": "^1.3.0", "babel-preset-expo": "~55.0.24", "expo-asset": "~55.0.18", "expo-constants": "~55.0.17", "expo-file-system": "~55.0.24", "expo-font": "~55.0.8", "expo-keep-awake": "~55.0.8", "expo-modules-autolinking": "55.0.25", "expo-modules-core": "55.0.25", "pretty-format": "^29.7.0", "react-refresh": "^0.14.2", "whatwg-url-minimum": "^0.1.2" }, "peerDependencies": { "@expo/dom-webview": "*", "@expo/metro-runtime": "*", "react": "*", "react-native": "*", "react-native-webview": "*" }, "optionalPeers": ["@expo/dom-webview", "@expo/metro-runtime", "react-native-webview"], "bin": { "expo": "bin/cli", "expo-modules-autolinking": "bin/autolinking", "fingerprint": "bin/fingerprint" } }, "sha512-rKWG+gjM4e+nJ6UUXn+jhs1+2lkzwLHjUZL9U4ejN3mLtqU9sOYvX925tOaD/lu3847LoZ8i5GJiyqu3tmK7Lg=="],
 
     "expo-asset": ["expo-asset@55.0.20", "https://registry.npmmirror.com/expo-asset/-/expo-asset-55.0.20.tgz", { "dependencies": { "@expo/image-utils": "^0.8.17", "expo-constants": "~55.0.17" }, "peerDependencies": { "expo": "*", "react": "*", "react-native": "*" } }, "sha512-BpybBESZj8WxW/WXuQhiY8D1azkJtxLuteIfprokJw0uU5r/g7cD+vzrzKJSlE4hhUlKeUGsoKzSK0nSJJ2sMQ=="],
+
+    "expo-blur": ["expo-blur@55.0.18", "https://registry.npmmirror.com/expo-blur/-/expo-blur-55.0.18.tgz", { "peerDependencies": { "expo": "*", "react": "*", "react-native": "*" } }, "sha512-eXuVAahonZXLrXa//isvq72ed1to/MmbHUyd2WTkRH2/FjC9X91rZ4BUNIFBZnAxaNXQrKw/ITfG/VMVz1DIhQ=="],
 
     "expo-constants": ["expo-constants@55.0.17", "https://registry.npmmirror.com/expo-constants/-/expo-constants-55.0.17.tgz", { "dependencies": { "@expo/env": "~2.1.3" }, "peerDependencies": { "expo": "*", "react-native": "*" } }, "sha512-t0SNWmXTjXPCHzjNsv1Okjaj8SpXQcUjDPtYDqvofDS+BhAsvlKNmwaaWXvduBjjmmmJWNH8q1/x9IWQ+upg8g=="],
 

@@ -59,3 +59,16 @@ So the trigger is not the row wrapper itself, but "many newly created elements i
 - **In this minimal app: NOT reproduced, across three fidelity levels** (12 / 24 / 40 rows, plus 4 animated tiles, an animated scroll scrim and an animated tab indicator): 0 exceptions and the probe stayed responsive through every 16-remount soak.
 - Discriminators we could isolate in the app: (a) how many elements are created in **one commit** (12 rows froze; ~7 rows stayed clean across 2 full soak runs), and (b) how much Reanimated activity is on screen at the same time (header scroll handler, tiles, bottom navigation, UI-library list chrome).
 - We are happy to iterate on this repro — tell us which knob to turn (row count, more animated chrome, adding UI-library components) or what instrumentation would help.
+
+## Bisect log (branch `bisect`, 2026-09-23)
+
+Starting from `main` (40 rows, 4 animated tiles, animated scrim, animated tab indicator), we added the reported app's characteristics one by one and re-ran the full 16-remount soak each time. **None of them reproduced the freeze in this minimal app** (0 `HostFunction` exceptions, probe responsive every time):
+
+| added factor | mirrors | result |
+| --- | --- | --- |
+| real blur (Glass) group card via `expo-blur` | the reported app's group container is a real iOS blur surface | no freeze |
+| `Animated.ScrollView` as the scroll container | `heroui-native`'s `ScrollShadow` converts its child scroll component into a Reanimated component | no freeze |
+| `RefreshControl` on the list | the reported list has pull-to-refresh | no freeze |
+| (earlier) 12 → 24 → 40 rows, 4 tiles, scrim, tab indicator | amount of elements created per commit + on-screen Reanimated activity | no freeze |
+
+Residual differences that we could **not** reproduce in a minimal app (i.e. where we would look next): the reported list's per-row/per-render JS weight (UI-library components with runtime style resolution, chips/badges/progress bars inside every row), the screen being contained in `expo-router` / `react-native-screens`, and the real data/timing characteristics of the app.
