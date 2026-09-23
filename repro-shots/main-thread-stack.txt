@@ -1,0 +1,16 @@
+ 2474 Thread_408886 DispatchQueue_1: com.apple.main-thread (serial)
+ + 2474 start (in dyld) + 6688 
+ + 2474 start_sim (in dyld_sim) + 20 
+ + 2474 __debug_main_executable_dylib_entry_point (in BulkMountFreeze.debug.dylib) + 28 /<compiler-generated>:0
+ + 2474 static AppDelegate.$main() (in BulkMountFreeze.debug.dylib) + 44 /<compiler-generated>:0
+ + 2474 static UIApplicationDelegate.main() (in BulkMountFreeze.debug.dylib) + 128 /<compiler-generated>:0
+ + 2474 ??? (in UIKitCore) load address + 
+ + 2474 UIApplicationMain (in UIKitCore) + 124 
+ + 2474 - (in UIKitCore) + 772 
+ + 2474 GSEventRunModal (in GraphicsServices) + 116 
+ + 2474 _CFRunLoopRunSpecificWithOptions (in CoreFoundation) + 496 
+ + 2473 __CFRunLoopRun (in CoreFoundation) + 1128 
+ + ! 2473 __CFRunLoopServiceMachPort (in CoreFoundation) + 156 
+ + ! 2473 mach_msg (in libsystem_kernel.dylib) + 20 
+ + ! 2473 mach_msg_overwrite (in libsystem_kernel.dylib) + 484 
+ + ! 2473 mach_msg2_internal (in libsystem_kernel.dylib) + 72 

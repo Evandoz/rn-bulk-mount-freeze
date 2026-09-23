@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { BlurView } from "expo-blur";
 import Animated, {
@@ -47,15 +47,44 @@ function Tile({ label, count, selected, onPress }: {
   );
 }
 
+// ---------------------------------------------------------------
+// Bisect: models the reported app's per-render style work.
+// UI-library rows resolve styles at runtime (variant tables, tailwind-variants,
+// Uniwind) instead of using a static StyleSheet, so every commit costs real JS time.
+// ---------------------------------------------------------------
+const STYLE_WORK = 20000;
+let styleWorkMs = 0;
+
+function computeRowStyle(index: number) {
+  let acc = 0;
+  for (let i = 0; i < STYLE_WORK; i++) acc += (i % 7) * 0.5;
+  const tint = Math.min(1, (acc % 97) / 97);
+  return {
+    borderRadius: 12 + (index % 3),
+    backgroundColor: `rgba(244,244,246,${(0.9 + tint * 0.1).toFixed(3)})`,
+    marginVertical: index % 2 === 0 ? 4 : 4.5,
+  };
+}
+
+function logStyleWork(label: string) {
+  if (styleWorkMs > 0) {
+    console.log(`[bisect] ${label}: runtime style work ≈ ${styleWorkMs.toFixed(1)} ms for this remount`);
+    styleWorkMs = 0;
+  }
+}
+
 function Row({ index }: { index: number }) {
   const { style, onPressIn, onPressOut } = usePressScale();
+  const startedAt = performance.now();
+  const dynamicStyle = computeRowStyle(index);
+  styleWorkMs += performance.now() - startedAt;
   return (
     <AnimatedPressable
       accessibilityRole="button"
       onPress={() => undefined}
       onPressIn={onPressIn}
       onPressOut={onPressOut}
-      style={[styles.row, style]}
+      style={[styles.row, dynamicStyle, style]}
     >
       <View style={styles.rowCopy}>
         <Text style={styles.rowTitle}>验收事项 {index + 1}</Text>
@@ -73,6 +102,16 @@ function Row({ index }: { index: number }) {
 
 export default function App() {
   const [showRows, setShowRows] = useState(true);
+
+  // 把“本次重挂的运行时样式成本”显示在界面上（dev-client 下 console.log 不可靠）。
+  const [lastCostMs, setLastCostMs] = useState(0);
+  const rowCountForCost = showRows ? 40 : 0;
+  useEffect(() => {
+    if (styleWorkMs > 0) {
+      setLastCostMs(styleWorkMs);
+      styleWorkMs = 0;
+    }
+  }, [rowCountForCost]);
   const rows = showRows ? ROWS_IN_GROUP : 0;
 
   // Reanimated activity elsewhere on the screen (as in the reported app: header uses
@@ -94,9 +133,25 @@ export default function App() {
       </Animated.View>
 
       <View style={styles.summary}>
-        <Tile label="待处理" count={rows} selected={showRows} onPress={() => setShowRows(true)} />
+        <Tile
+          label="待处理"
+          count={rows}
+          selected={showRows}
+          onPress={() => {
+            logStyleWork("load rows");
+            setShowRows(true);
+          }}
+        />
         <Tile label="逾期" count={0} selected={false} onPress={() => undefined} />
-        <Tile label="待验收" count={0} selected={!showRows} onPress={() => setShowRows(false)} />
+        <Tile
+          label="待验收"
+          count={0}
+          selected={!showRows}
+          onPress={() => {
+            logStyleWork("clear rows");
+            setShowRows(false);
+          }}
+        />
         <Tile label="已完成" count={0} selected={false} onPress={() => undefined} />
       </View>
 
@@ -110,7 +165,10 @@ export default function App() {
         refreshControl={<RefreshControl onRefresh={() => undefined} refreshing={false} tintColor="#8A8A90" />}
         scrollEventThrottle={16}
       >
-        <Text style={styles.batch}>种子批次 · {rows} 项待处理</Text>
+        <Text style={styles.batch}>
+          种子批次 · {rows} 项待处理
+          {lastCostMs > 0 ? ` · style ≈ ${lastCostMs.toFixed(1)} ms` : ""}
+        </Text>
         {/* Bisect: the reported app's group container carries the single real blur (Glass) layer on iOS. */}
         <BlurView intensity={40} style={styles.card} tint="light">
           <Text style={styles.cardTitle}>二层 · 防火门 {rows === 0 ? "0/0" : `0/${rows}`}</Text>

@@ -72,3 +72,18 @@ Starting from `main` (40 rows, 4 animated tiles, animated scrim, animated tab in
 | (earlier) 12 → 24 → 40 rows, 4 tiles, scrim, tab indicator | amount of elements created per commit + on-screen Reanimated activity | no freeze |
 
 Residual differences that we could **not** reproduce in a minimal app (i.e. where we would look next): the reported list's per-row/per-render JS weight (UI-library components with runtime style resolution, chips/badges/progress bars inside every row), the screen being contained in `expo-router` / `react-native-screens`, and the real data/timing characteristics of the app.
+
+## Confirmed reproduction (2026-09-23, branch `bisect`)
+
+With `ROWS_IN_GROUP = 40` **and runtime style work per row** (`computeRowStyle`, `STYLE_WORK = 20000` → measured on device and shown in the UI as **≈ 38 ms per remount**), this plain-Reanimated screen (no UI library, no router) **freezes** during the 16-remount soak — twice in a row, on a freshly rebooted simulator, with **no system dialogs** on screen:
+
+- the UI stops updating: the last frame stays (including the status-bar clock), and taps **and swipes** have no effect;
+- the process stays alive and **CPU ≈ 0%** (not a busy loop / not a livelock);
+- the app's log contains **no** `HostFunction`, `Inconsistency` or `ShadowTree` messages;
+- `sample` of the frozen process: the **main thread is idle in its run loop** — `mach_msg2_trap` → `CFRunLoopServiceMachPort` → `__CFRunLoopRun` (see `repro-shots/main-thread-stack.txt`), i.e. nothing is driving frames any more.
+
+Evidence: `repro-shots/frozen-38ms.png` (frozen frame after the probe tap), `repro-shots/cost-readout-38ms.png` (on-screen cost readout), `repro-shots/main-thread-stack.txt`.
+
+Reading of the mechanism (revised): the failure is not tied to the row's animated wrapper or to the list structure, but to the **frame/driver path** (Reanimated's frame loop) once per-commit work gets heavy enough. In the full app the same situation *additionally* logs `Exception in HostFunction: <unknown>` at `_maybeFlushUIUpdatesQueue`, which we now read as a **companion symptom** of the heavier scenario rather than the cause.
+
+Reproduce it: `bun install && npx expo run:ios`, then 8 rounds × 2 taps (~4 s apart) on the two tiles; the freeze appears within the first rounds.
