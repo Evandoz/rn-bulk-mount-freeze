@@ -11,7 +11,7 @@ import Animated, {
 // with a built-in press scale driven by a shared value.
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const ROWS_IN_GROUP = 12;
+const ROWS_IN_GROUP = 40;
 
 function usePressScale() {
   const pressed = useSharedValue(0);
@@ -60,7 +60,12 @@ function Row({ index }: { index: number }) {
         <Text style={styles.rowTitle}>验收事项 {index + 1}</Text>
         <Text style={styles.rowMeta}>mounted in one commit · row {index + 1}</Text>
       </View>
-      <Text style={styles.chevron}>›</Text>
+      <View style={styles.rowTrailing}>
+        <View style={styles.chip}>
+          <Text style={styles.chipLabel}>待处理</Text>
+        </View>
+        <Text style={styles.chevron}>›</Text>
+      </View>
     </AnimatedPressable>
   );
 }
@@ -76,6 +81,10 @@ export default function App() {
   const onScroll = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
   });
+  const scrimStyle = useAnimatedStyle(() => ({ opacity: scrollY.value > 8 ? 0.35 : 0 }));
+  const tabIndicatorStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: scrollY.value > 8 ? 12 : 0 }],
+  }));
 
   return (
     <View style={styles.root}>
@@ -84,9 +93,13 @@ export default function App() {
       </Animated.View>
 
       <View style={styles.summary}>
-        <Tile label="待处理 (12 rows)" count={rows} selected={showRows} onPress={() => setShowRows(true)} />
-        <Tile label="待验收 (0 rows)" count={0} selected={!showRows} onPress={() => setShowRows(false)} />
+        <Tile label="待处理" count={rows} selected={showRows} onPress={() => setShowRows(true)} />
+        <Tile label="逾期" count={0} selected={false} onPress={() => undefined} />
+        <Tile label="待验收" count={0} selected={!showRows} onPress={() => setShowRows(false)} />
+        <Tile label="已完成" count={0} selected={false} onPress={() => undefined} />
       </View>
+
+      <Animated.View pointerEvents="none" style={[styles.scrim, scrimStyle]} />
 
       <ScrollView
         contentContainerStyle={styles.content}
@@ -103,6 +116,15 @@ export default function App() {
           )}
         </View>
       </ScrollView>
+
+      <View style={styles.tabBar}>
+        {["待办", "上报", "应用", "我的"].map((label, index) => (
+          <View key={label} style={styles.tabItem}>
+            <Text style={[styles.tabLabel, index === 0 && styles.tabLabelActive]}>{label}</Text>
+          </View>
+        ))}
+        <Animated.View pointerEvents="none" style={[styles.tabIndicator, tabIndicatorStyle]} />
+      </View>
     </View>
   );
 }
@@ -134,5 +156,14 @@ const styles = StyleSheet.create({
   rowCopy: { flex: 1, minWidth: 0 },
   rowTitle: { fontSize: 15, fontWeight: "600", color: "#111111" },
   rowMeta: { fontSize: 12, color: "#8A8A90", marginTop: 2 },
-  chevron: { fontSize: 20, color: "#B0B0B6", paddingLeft: 8 },
+  rowTrailing: { flexDirection: "row", alignItems: "center", gap: 6 },
+  chip: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: "#E7ECFB" },
+  chipLabel: { fontSize: 11, color: "#3F6FD8", fontWeight: "600" },
+  chevron: { fontSize: 20, color: "#B0B0B6", paddingLeft: 2 },
+  scrim: { position: "absolute", top: 0, left: 0, right: 0, height: 150, backgroundColor: "#000000" },
+  tabBar: { flexDirection: "row", paddingVertical: 14, backgroundColor: "#FFFFFF" },
+  tabItem: { flex: 1, alignItems: "center" },
+  tabLabel: { fontSize: 12, color: "#8A8A90" },
+  tabLabelActive: { color: "#111111", fontWeight: "700" },
+  tabIndicator: { position: "absolute", bottom: 6, left: "8%", width: 60, height: 3, borderRadius: 2, backgroundColor: "#111111" },
 });
