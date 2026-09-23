@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "BulkMountFreeze",
+    "slug": "rn-bulk-mount-freeze",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.evandoz.rnbulkmountfreeze",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.evandoz.rnbulkmountfreeze"
+    }
+  }
+}
