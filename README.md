@@ -1,3 +1,7 @@
+# Repro for software-mansion/react-native-reanimated#10672
+
+This branch pins `react-native-reanimated@4.5.5` + `react-native-worklets@0.10.1` (the only change vs `main`). On launch the JS side asks for a static flag the native build does not recognise (`Unable to recognize flag: USE_ANIMATION_BACKEND`, repeated), then the process dies with EXC_BAD_ACCESS (SIGSEGV).
+
 # Reanimated 4.2.1 iOS freeze — bulk list (re)mount repro
 
 Minimal standalone repro for:
